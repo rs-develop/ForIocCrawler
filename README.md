@@ -47,7 +47,7 @@ The programm comes with two modes:
 * stdout printing mode (default)
 * csv
 
-The *stdout* modes is discribed above. The csv mode is better for prozessing large directories or mount points.
+The *stdout* modes is discribed above. The csv mode is better for processing large directories or mount points.
 It comes with a better overview: file count, processing status and an ioc summary.
 
 ```
@@ -103,7 +103,7 @@ optional arguments:
 For version 1.1
 - [ ] Implement support for personal whitelists
 - [ ] Implement support for personal pattern file
-- [ ] OPEN    Implement support for personal regex
+- [ ] Implement support for personal regex
 
 For version 1.2
 - [ ] Search in compressed file formats like zip etc.
