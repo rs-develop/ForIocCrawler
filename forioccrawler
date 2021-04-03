@@ -61,9 +61,9 @@ if __name__ == "__main__":
 		result_columns = []
 
 		# configs
-		config_file    = os.path.join(basedir, 'data/config.ini')
-		pattern_file   = os.path.join(basedir, 'data/pattern.ini')
-		whitelist_file = os.path.join(basedir, 'data/whitelist.ini')
+		config_file    = os.path.join(basedir, os.path.dirname(crawler.__file__) + '/data/config.ini')
+		pattern_file   = os.path.join(basedir, os.path.dirname(crawler.__file__) + '/data/pattern.ini')
+		whitelist_file = os.path.join(basedir, os.path.dirname(crawler.__file__) + '/data/whitelist.ini')
 		
 		# read config
 		try:
