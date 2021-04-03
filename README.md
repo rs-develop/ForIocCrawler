@@ -50,7 +50,7 @@ The programm comes with two modes:
 The *stdout* modes is discribed above. The csv mode is better for prozessing large directories or mount points.
 It comes with a better overview: file count, processing status and an ioc summary.
 
-"""
+```
 +] Init Crawler
 [+] Checking files
  |- 246 files found
@@ -72,10 +72,10 @@ It comes with a better overview: file count, processing status and an ioc summar
  |- IP: 1979
  |- MAIL: 4
 [+] Done
-"""
+```
 
 ## Program help
-"""
+```
 usage: forioccrawler.py [-h] -f FILE_OR_DIR [--mode {stdout,csv}] [--format {file,ioc,match,offset,all} [{file,ioc,match,offset,all} ...]] [--sections {ip,url,mail,reg,all} [{ip,url,mail,reg,all} ...]] [-o OUTPUT_FILE_NAME] [-t THREADS] [-n] [-v]
                         [--time] [--version]
 
@@ -97,19 +97,19 @@ optional arguments:
   --time                Show run time.
   --version             Show program version
 
-"""
+```
 
 ## ToDo
 For version 1.1
-[] Implement support for personal whitelists
-[] Implement support for personal pattern file
-[] OPEN    Implement support for personal regex
+- [] Implement support for personal whitelists
+- [] Implement support for personal pattern file
+- [] OPEN    Implement support for personal regex
 
 For version 1.2
-[] Search in compressed file formats like zip etc.
-[] Search in file formats like pdf word etc.
-[] Add mor export features like json output
-[] Optimize multiprocessing based on file size etc.
-[] Rewrite how configurations (user settings like format, blocksize for reading etc) will passed to the crawler
-[] Implement switch for printing offset as hex or decimal
-[] Implement switch to output/export only unique matches
+- [] Search in compressed file formats like zip etc.
+- [] Search in file formats like pdf word etc.
+- [] Add mor export features like json output
+- [] Optimize multiprocessing based on file size etc.
+- [] Rewrite how configurations (user settings like format, blocksize for reading etc) will passed to the crawler
+- [] Implement switch for printing offset as hex or decimal
+- [] Implement switch to output/export only unique matches
