@@ -18,27 +18,27 @@ It also have a whitelisting to prevent false positives like version numbers.
 
 ## Installation
 
-Install using pip3:
+Install using pip3:<br>
 `pip3 install forioccrawler`
 
 ## Quick Start
 
-Simple run over a file. The output of the results will printed to *stdout*.
+Simple run over a file. The output of the results will printed to *stdout*.<br>
 `forioccrawler -f executable.bin`
 
-For show matches only, you have to use the *format* argument and the match keyword.
+For show matches only, you have to use the *format* argument and the match keyword.<br>
 `forioccrawler -f test.txt --format match`
 
-You can also add more *format* options if you like. Its also possoble to mix them up.
+You can also add more *format* options if you like. Its also possoble to mix them up.<br>
 `forioccrawler -f word.exe --format match offset`
 
-To search only for urls, you can use the *sections* arguments. Multiple options are allowed.
+To search only for urls, you can use the *sections* arguments. Multiple options are allowed.<br>
 `forioccrawler -f new.txt --sections url`
 
-Print the matches on stdout and write them to file:
+Print the matches on stdout and write them to file:<br>
 `forioccrawler -f new.txt --format ioc match offset -o output_file.csv`
 
-All mentioned arguments are usable with huge directories or mount points with a lot of files:
+All mentioned arguments are usable with huge directories or mount points with a lot of files:<br>
 `forioccrawler -f /mnt/image01 --format ioc match offset -o output_file.csv`
 
 ## Program modes
@@ -101,15 +101,15 @@ optional arguments:
 
 ## ToDo
 For version 1.1
-- [] Implement support for personal whitelists
-- [] Implement support for personal pattern file
-- [] OPEN    Implement support for personal regex
+- [ ] Implement support for personal whitelists
+- [ ] Implement support for personal pattern file
+- [ ] OPEN    Implement support for personal regex
 
 For version 1.2
-- [] Search in compressed file formats like zip etc.
-- [] Search in file formats like pdf word etc.
-- [] Add mor export features like json output
-- [] Optimize multiprocessing based on file size etc.
-- [] Rewrite how configurations (user settings like format, blocksize for reading etc) will passed to the crawler
-- [] Implement switch for printing offset as hex or decimal
-- [] Implement switch to output/export only unique matches
+- [ ] Search in compressed file formats like zip etc.
+- [ ] Search in file formats like pdf word etc.
+- [ ] Add mor export features like json output
+- [ ] Optimize multiprocessing based on file size etc.
+- [ ] Rewrite how configurations (user settings like format, blocksize for reading etc) will passed to the crawler
+- [ ] Implement switch for printing offset as hex or decimal
+- [ ] Implement switch to output/export only unique matches
