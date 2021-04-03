@@ -100,6 +100,7 @@ optional arguments:
 ```
 
 ## ToDo
+
 For version 1.1
 - [ ] Implement support for personal whitelists
 - [ ] Implement support for personal pattern file
@@ -113,3 +114,7 @@ For version 1.2
 - [ ] Rewrite how configurations (user settings like format, blocksize for reading etc) will passed to the crawler
 - [ ] Implement switch for printing offset as hex or decimal
 - [ ] Implement switch to output/export only unique matches
+
+## Contact
+
+rsdevelop.contact@gmail.com
