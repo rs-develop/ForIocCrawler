@@ -1,0 +1,80 @@
+-------------------------------------------------------------------------------
+
+                            TODO - ForIocCrawler
+
+-------------------------------------------------------------------------------
+Key
+        DONE - Item is finished
+        PROG - Item under progress
+        OPEN - Item not touche
+
+-------------------------------------------------------------------------------
+
+Release v 1.0 Features
+
+    DONE    Search binary in file or directories for matches.
+
+    DONE    Block overlapping search
+
+    DONE    Use configuration files for pattern and whitelists.
+
+    DONE    Implement whitelisting
+
+    DONE    Implement Pattern (Multiple Sections and Options)
+    
+    DONE    Multiprocessig based on file count
+
+    DONE    Logging, debug view and run time output
+
+    DONE    CSV Export
+
+    DONE    stdout Export
+
+    DONE    Implement match highlighting
+
+    DONE    Implement match count feature
+
+    DONE    Add file offset to match
+
+    DONE    Choose columns for export
+
+    DONE    Export/print only specific pattern
+
+    DONE    Implement User interrupt.
+    
+-------------------------------------------------------------------------------
+Release v 1.0                                                  DONE
+-------------------------------------------------------------------------------
+
+Release v 1.1 Features
+
+    OPEN    Implement support for personal whitelists
+
+    OPEN    Implement support for personal pattern file
+
+    OPEN    Implement support for personal regex
+
+-------------------------------------------------------------------------------
+Release v 1.1                                                  OPEN
+-------------------------------------------------------------------------------
+
+Release v 1.2 Features
+
+    OPEN    Search in compressed file formats like zip etc.
+
+    OPEN    Search in file formats like pdf word etc.
+
+    OPEN    Add mor export features like json output
+
+    OPEN    Optimize multiprocessing based on file size etc.
+
+    OPEN    Rewrite how configurations (user settings like format, blocksize 
+            for reading etc) will passed to the crawler
+
+    OPEN    Implement switch for printing offset as hex or decimal
+
+    OPEN    Implement switch to output/export only unique matches
+
+-------------------------------------------------------------------------------
+Release v 1.2                                                  OPEN
+-------------------------------------------------------------------------------
