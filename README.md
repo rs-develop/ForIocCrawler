@@ -25,6 +25,9 @@ pattern files. It offers a grep like *stdout* mode and a detailed *forensics* mo
 Install using pip3:<br>
 `pip3 install forioccrawler`
 
+Upgrade using pip3:<br>
+`pip3 install forioccrawler -U`
+
 ## Quick Start
 
 Simple run over a file. The output of the results will printed to *stdout*.<br>
