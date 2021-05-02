@@ -59,7 +59,10 @@ class Crawler():
                 self.rootFilePath = pathSrc
 
             # set relative path
-            self.rootRelPath = os.path.relpath(pathSrc)
+            if self.rootFilePath != pathSrc:
+                self.rootRelPath = os.path.relpath(pathSrc)
+            else:
+                self.rootRelPath = pathSrc
 
             # Check match size
             if self.matchSize < 5:
@@ -210,8 +213,8 @@ class Crawler():
         try:
             for file in blockFiles:
                 try:
-                    # create value object for the results
-                    cvo = CrawlerVo(file)
+                    # create value object for the results - save only the relative path to the results
+                    cvo = CrawlerVo(file[len(self.rootRelPath):])
 
                     with open(file, 'rb') as f:
                         LOG.debug("Processing %s" %(file))
@@ -227,6 +230,11 @@ class Crawler():
                         
                         # read the file in blocks
                         while filePos < fileSize:
+
+                            # log status
+                            if filePos > 0:
+                                if (filePos/10) % 100 == 0:
+                                    LOG.debug("Hanging on %s; read %d/%d bytes" %(file, filePos, fileSize))
 
                             buffer = None
                             buffer = f.read(bufSize+overlap)
@@ -260,7 +268,8 @@ class Crawler():
                                                 #printDict = {"file" : file, "ioc" : ioc_type, 
                                                 #            "match": before + matchString + after, "offset": str(filePos + item.start())}
 
-                                                printDict = {"file" : file, "ioc" : ioc_type, "match": matchString, "offset": str(filePos + item.start())}
+                                                # hint: save only relative path
+                                                printDict = {"file" : file[len(self.rootRelPath):], "ioc" : ioc_type, "match": matchString, "offset": str(filePos + item.start())}
 
                                                 isWhiteListed = False
 

@@ -52,6 +52,16 @@ LOG = logging.getLogger('IocCrawlerLog')
 LOG.setLevel(logging.NOTSET)
 
 ## --------------------------------------------------------------------------------------------------------------------
+def convertTime(seconds):
+    seconds = seconds % (24 * 3600)
+    hour = seconds // 3600
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+      
+    return "%d:%02d:%02d" % (hour, minutes, seconds)
+
+## --------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
 
 	try:
@@ -184,7 +194,7 @@ if __name__ == "__main__":
 		# show run time
 		if args.time or args.verbose:
 			stop = timeit.default_timer()
-			print('[+] Jobs finished in: ', stop - start)
+			print('[+] Jobs finished in: %s (H:MM:SS)' %(convertTime(stop - start)))
 
 		# show summary if not printed to stdout
 		if not printToStdout:
@@ -197,7 +207,7 @@ if __name__ == "__main__":
 			# show run time
 			if args.time or args.verbose:
 				stop = timeit.default_timer()
-				print('[+] Jobs finished in: ', stop - start)
+				print('[+] Jobs finished in: %s (H:MM:SS)' %(convertTime(stop - start)))
 		
 			print("[+] Done")
 		# end if

@@ -60,9 +60,25 @@ Release v 1.1 Features
 Release v 1.1                                                  DONE
 -------------------------------------------------------------------------------
 
+Bug fixes
+
+    DONE    Fixed a bug which was caused if the source was a 
+            absolute path
+
+    DONE    Added better debug view. Verbose mode shows now a
+            status of long running
+
+    DONE    Changed format of the printing of the runtime
+
+    PROC    Only show relative path (the crawled data) in result
+
+-------------------------------------------------------------------------------
+Release v 1.1.1                                                DONE
+-------------------------------------------------------------------------------
+
 Release v 1.2 Features
 
-    OPEN    Search in compressed file formats like zip etc.
+    OPEN    Search in compressed file formats like zip, tar.gz etc.
 
     OPEN    Search in file formats like pdf word etc.
 

@@ -25,6 +25,9 @@ pattern files. It offers a grep like *stdout* mode and a detailed *forensics* mo
 Install using pip3:<br>
 `pip3 install forioccrawler`
 
+Upgrade using pip3:<br>
+`pip3 install forioccrawler -U`
+
 ## Quick Start
 
 Simple run over a file. The output of the results will printed to *stdout*.<br>
@@ -85,6 +88,7 @@ directories or mount points. It comes with a better overview: file count, proces
 
 If u use the *-v* argument a more detailed output will be printed. Also a debug file will be written to the current directory.
 In verbose mode whitelisted files (path + name), loaded pattern count, errors, a detailed processing log etc. will be written.
+It also tells you which file and process causes a long runtime.
 
 ## Whitelisting and Pattern
 
