@@ -48,14 +48,16 @@ Release v 1.0                                                  DONE
 
 Release v 1.1 Features
 
-    OPEN    Implement support for personal whitelists
+    DONE    Implement support for personal whitelists
 
-    OPEN    Implement support for personal pattern file
+    DONE    Implement support for personal pattern file
 
-    OPEN    Implement support for personal regex
+    DONE    Rename program mode CSV to forensic
+
+    DONE    Implement max match size
 
 -------------------------------------------------------------------------------
-Release v 1.1                                                  OPEN
+Release v 1.1                                                  DONE
 -------------------------------------------------------------------------------
 
 Release v 1.2 Features
@@ -74,6 +76,12 @@ Release v 1.2 Features
     OPEN    Implement switch for printing offset as hex or decimal
 
     OPEN    Implement switch to output/export only unique matches
+
+    OPEN    Implement a whitelist contains feature.
+            Whitelisting for files or matches which contains a specific
+            string
+        
+    OPEN    Implement support for personal regex
 
 -------------------------------------------------------------------------------
 Release v 1.2                                                  OPEN

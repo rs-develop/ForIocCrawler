@@ -13,10 +13,22 @@ class CrawlerConfigError(CrawlerError):
 	def __init__(self, what):
 		self.msg = "[!] Error while loading config. Message: " + what
 
+## Exception for pattern errors
+class CrawlerPatternError(CrawlerError):
+	def __init__(self, what):
+		self.msg = "[!] Error while loading pattern file. Message: " + what
+
+class CrawlerMatchError(CrawlerError):
+	def __init__(self, what):
+		self.msg = "[!] Error while processing pattern match. Message: " + what
+
 ## Exception for file handling errors
 class CrawlerFileReadError(CrawlerError):
-	def __init__(self, fileNameSrc, what):
-		self.msg = "[!] Error while reading file : %s. Message: %s" % (fileNameSrc, what)
+	def __init__(self, what, fileNameSrc=None):
+		if fileNameSrc:
+			self.msg = "[!] Error while reading file : %s. Message: %s" % (fileNameSrc, what)
+		else:
+			self.msg = "[!] Error while reading source. Message: %s" % (what)
 
 ## Exception for processing errors
 class CrawlerProcessError(CrawlerError):

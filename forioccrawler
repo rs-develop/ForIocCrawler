@@ -39,7 +39,7 @@ import timeit		   # for run time
 
 from configparser import ConfigParser, ExtendedInterpolation # for loading config files
 from crawler import crawler
-from crawler.crawlererr import CrawlerError, CrawlerConfigError, CrawlerExportError, CrawlerFileReadError
+from crawler.crawlererr import CrawlerError, CrawlerConfigError, CrawlerPatternError, CrawlerExportError, CrawlerFileReadError
 from crawler.exporter import CrawlerExporter
 
 ## --------------------------------------------------------------------------------------------------------------------
@@ -56,9 +56,10 @@ if __name__ == "__main__":
 
 	try:
 
-		printToStdout  = False
-		basedir        = os.path.dirname(os.path.abspath(__file__))
-		result_columns = []
+		printToStdout   = False
+		basedir         = os.path.dirname(os.path.abspath(__file__))
+		result_columns  = []
+		pattern_columns = []
 
 		# configs
 		config_file    = os.path.join(basedir, os.path.dirname(crawler.__file__) + '/data/config.ini')
@@ -73,18 +74,26 @@ if __name__ == "__main__":
 		except Exception as e:
 			raise CrawlerConfigError(getattr(e, 'message', repr(e)))
 
+		# read sections from pattern
+		try:
+			pattern = ConfigParser(interpolation=ExtendedInterpolation())
+			pattern.read(pattern_file)
+			pattern_columns = [x.lower() for x in pattern.sections()]
+		except Exception as e:
+			raise CrawlerConfigError(getattr(e, 'message', repr(e)))
+
 		# parse arguments
 		argparser = argparse.ArgumentParser(description="IoC crawler for files, directories or mount points.")
 		argparser.add_argument('-f', dest='FILE_OR_DIR', required=True, action='store', help='File, directory or mount point.')
-		argparser.add_argument("--mode", choices=["stdout","csv"], dest='output_mode', default='stdout', help='Output mode. Print results to stdout (default) or write them to file.')
-		argparser.add_argument('--format', choices=result_columns + ["all"], default="all", nargs='+', help='Printed columns. On default all columns will be printed.')
-		argparser.add_argument('--sections', choices=["ip", "url", "mail", "reg", "all"], default="all", nargs='+', help="Print results for specific section(s) only.")
+		argparser.add_argument("--mode", choices=["stdout","forensics"], dest='output_mode', default='stdout', help='Output mode. Print results to stdout (default) or run in forensics mode with processing status and summary.')
+		argparser.add_argument('--format', choices=result_columns + ["all"], default="all", nargs='+', type=str.lower, help='Printed columns. On default all columns will be printed.')
+		argparser.add_argument('--sections', nargs="+", default="all", help="Print results for specific section(s). Available sections are depending of the pattern file. Default sections: \"%s\"" %" ".join([x.lower() for x in pattern_columns]))
 		argparser.add_argument('-o', dest='output_file_name', help='Output file name (works also in stdout mode).')
-		#argparser.add_argument('-p', dest='pattern_file', default=pattern_file, help='personal pattern file')
-		#argparser.add_argument('-w', dest='whitelist_file', default=whitelist_file, help='personal whitelist file')
-		#argparser.add_argument('-E', dest='expresion', help='regex')
+		argparser.add_argument('-p', dest='individual_pattern_file', help='Use individual pattern file.')
+		argparser.add_argument('-w', dest='whitelist_file', help='Use individual whitelist file')
 		argparser.add_argument("-t", "--threads", type=int, default=4, help='Max process count (default=4, max=%d)' % int(config['settings']['max_processes']))
 		argparser.add_argument('-n', action='store_false', dest='match_highlighting', default=True, help="No match highligting")
+		argparser.add_argument('-s', dest='match_size', default=256, type=int, help="Set maximal match size (default=256). Have to be greater then 5.")
 		argparser.add_argument("-v", "--verbose", action = "store_true", help='Show debug messages and write debug log')
 		argparser.add_argument("--time", action = "store_true", help='Show run time.')
 		argparser.add_argument("--version", action='version', version=config['settings']['version'], help='Show program version')
@@ -120,13 +129,13 @@ if __name__ == "__main__":
 		elif args.time:
 			start = timeit.default_timer()
 
-		# check mode
-		if args.output_mode not in ["csv", "stdout"]:
+		# check program mode
+		if args.output_mode not in ["forensics", "stdout"]:
 			argparser.print_help()
 			raise CrawlerError("Unknown format: %s." %args.output_mode)
-		elif args.output_mode == "csv" and args.output_file_name == None:
+		elif args.output_mode == "forensics" and args.output_file_name == None:
 			argparser.print_help()
-			raise CrawlerError("CSV-Mode requires a output file name.")
+			raise CrawlerError("Forensics-Mode requires a output file name.")
 
 		# check for stdout option and reset output path
 		if args.output_mode == "stdout":
@@ -136,13 +145,34 @@ if __name__ == "__main__":
 		if args.format != "all":
 			result_columns = args.format
 
+		# if an individual pattern file is set, check sections
+		if args.individual_pattern_file:
+			try:
+				pattern = ConfigParser(interpolation=ExtendedInterpolation())
+				pattern.read(args.individual_pattern_file)
+				pattern_columns = [x.lower() for x in pattern.sections()]
+			except Exception as e:
+				raise CrawlerPatternError(getattr(e, 'message', repr(e)))
+			
+			pattern_file = args.individual_pattern_file
+
+		# if an individual whitelist file is set, change path
+		if args.whitelist_file:
+			whitelist_file = args.whitelist_file
+
+		# check if selected sections is all, then set all sections from the individual pattern file
 		if args.sections == "all":
-			args.sections = ["ip", "url", "mail", "reg"]
+			args.sections = pattern_columns
+		# if not all is set, check if the sections is present in the pattern file, if not: throw exception
+		else:
+			for section in args.sections:
+					if section not in pattern_columns:
+						raise CrawlerPatternError("Unknown section %s in %s" %(section, pattern_file))
 
 		## -------------------------------------------------------------------
 		# run crawler
 		ioccrawler = crawler.Crawler(args.FILE_OR_DIR, args.threads, pattern_file, printToStdout, result_columns, 
-									 args.sections, args.match_highlighting, whitelist_file)
+									 args.sections, args.match_highlighting, args.match_size, whitelist_file, 0, 0)
 		ioccrawler.do()
 		## -------------------------------------------------------------------
 
@@ -173,10 +203,6 @@ if __name__ == "__main__":
 		# end if
 
 	# Handle errors
-	except CrawlerConfigError as cerr:
-		print(cerr.msg)
-	except CrawlerFileReadError as ferr:
-		print(ferr.msg)
 	except CrawlerError as err:
 		print(err.msg)
 	except KeyboardInterrupt:

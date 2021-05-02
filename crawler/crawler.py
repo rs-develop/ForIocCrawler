@@ -9,7 +9,7 @@ import multiprocessing # for multiprocessing purpose
 import re              # for pattern
 
 from configparser    import ConfigParser, ExtendedInterpolation # for loading config files
-from .crawlererr     import CrawlerConfigError, CrawlerError, CrawlerFileReadError, CrawlerProcessError # ioc crawler error handling
+from .crawlererr     import CrawlerConfigError, CrawlerError, CrawlerFileReadError, CrawlerProcessError, CrawlerMatchError # ioc crawler error handling
 from .crawlerdata    import CrawlerVo, CrawlerWhitelistData # data objects
 
 ## --------------------------------------------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ class Crawler():
     #  Init variables and read all files
     def __init__(self, pathSrc:str, threadsSrc:int, patternSrc:str, printToStdoutSrc:bool, 
                  resultColumnFormatSrc:list, sectionsSrc:list, matchHighlightingSrc:bool, 
-                 whitelistSrc:str=None) -> None:
+                 matchSizeSrc:int, whitelistSrc:str=None, beforeSrc:int=0, afterSrc:int=0) -> None:
         try:
             # init
             self.blockQueue         = multiprocessing.Queue()
@@ -33,6 +33,7 @@ class Crawler():
             self.processCount       = threadsSrc
             self.processedFileCount = multiprocessing.Value('i', 0)
             self.whiteListedMatches = multiprocessing.Value('i', 0)
+            self.overMaxMatchSize   = multiprocessing.Value('i', 0)
             self.rootFilePath       = ""
             self.rootRelPath        = ""
             self.printToStdOut      = printToStdoutSrc
@@ -42,13 +43,16 @@ class Crawler():
             self.result_columns     = resultColumnFormatSrc
             self.sectionsForResult  = sectionsSrc
             self.matchHighligting   = matchHighlightingSrc
+            self.before             = beforeSrc
+            self.after              = afterSrc
+            self.matchSize          = matchSizeSrc
 
             self._printCrawlerMessage('[+] Init Crawler')
             LOG.debug("Init Crawler")
 
             # check path of source dir
             if not os.path.exists(pathSrc):
-                raise CrawlerFileReadError(os.path.basename(pathSrc), "File not found.")
+                raise CrawlerFileReadError("File not found.", os.path.basename(pathSrc))
             if not os.path.isabs(pathSrc):
                 self.rootFilePath = os.path.abspath(pathSrc)
             else:
@@ -56,6 +60,10 @@ class Crawler():
 
             # set relative path
             self.rootRelPath = os.path.relpath(pathSrc)
+
+            # Check match size
+            if self.matchSize < 5:
+                raise CrawlerConfigError("Match size have to be greater then 5")
 
             # load pattern
             self.patterns = self._loadPattern(patternSrc)
@@ -65,7 +73,6 @@ class Crawler():
             if whitelistSrc:
                 self.whitlist = self._loadWhitelist(whitelistSrc)
                 LOG.debug('Whitelist loaded')
-                LOG.debug(self.whitlist)
             else:
                 LOG.debug('No whitelist')
             
@@ -73,7 +80,7 @@ class Crawler():
             self._printCrawlerMessage('[+] Checking files')
             self.fileList = self._readFiles(self.rootFilePath, self.rootRelPath)
             self.fileListSize = len(self.fileList)
-            self._printCrawlerMessage(" |- %d files found" %(self.fileListSize))
+            self._printCrawlerMessage(" |- %d files found, %d whitelisted." %(self.fileListSize, self.whitlistedFiles))
             LOG.debug("%d files found for processing" %(self.fileListSize))
 
         except CrawlerFileReadError as re:
@@ -135,6 +142,7 @@ class Crawler():
     # end _loadWhitelist
 
     ## Reads all files from the directory
+    #  If the file/directory is whitelisted, it will not added to the file list
     #  @param dirSrc root source
     #  @return file list to read
     def _readFiles(self, rootFilePathSrc, relPathSrc) -> list:
@@ -148,8 +156,10 @@ class Crawler():
                     for filename in files:
                         filePathStr = os.path.join(root, filename)
                         if self.whitlist:
+                            # get the index of the relative beginning of the file to check whitelisting
                             idx = filePathStr.index(relPathSrc) + len(relPathSrc)
                             if filePathStr[idx:] in self.whitlist:
+                                LOG.debug("%s whitelisted." %(filePathStr[idx:]))
                                 self.whitlistedFiles +=1
                             else:
                                 filesList.append(filePathStr)
@@ -159,7 +169,7 @@ class Crawler():
                 # end for
             # end rootFilePath is directory
         except IOError as io:
-            raise CrawlerFileReadError(filename, getattr(io, 'message', repr(io)))
+            raise CrawlerFileReadError(getattr(io, 'message', repr(io)), filename)
         except Exception as e:
             raise CrawlerError(getattr(e, 'message', repr(e)))
         return filesList
@@ -177,6 +187,8 @@ class Crawler():
                 summaryDict["Whitelisted files"] = self.whitlistedFiles
             if self.whiteListedMatches.value > 0:
                 summaryDict["Whitelisted matches"] = self.whiteListedMatches.value
+            if self.overMaxMatchSize.value > 0:
+                summaryDict["Matchs above the max match size"] = self.whiteListedMatches.value
         # end if self.whitlist
 
         for item in self.resultList:
@@ -198,8 +210,6 @@ class Crawler():
         try:
             for file in blockFiles:
                 try:
-                    posLastHit = 0
-                    lengthLastHit = 0
                     # create value object for the results
                     cvo = CrawlerVo(file)
 
@@ -230,30 +240,52 @@ class Crawler():
                                     
                                     for item in searchRes:
                                         if item.start() < bufSize:
-
-                                            matchString = item.group(0).decode("utf-8")
                                             
-                                            printDict = {"file" : file, "ioc" : ioc_type, 
-                                                        "match": matchString, "offset": str(filePos + item.start())}
-
-                                            isWhiteListed = False
-
-                                            if self.whitlist:
-                                                if matchString in self.whitlist:
-                                                    isWhiteListed = True
-                                                    with self.processedFileCount.get_lock():
-                                                        self.whiteListedMatches.value +=1
-                                            
-                                            if not isWhiteListed:
+                                            try:
+                                                matchString = item.group(0).decode("utf-8")
                                                 
-                                                if self.printToStdOut:
-                                                    self._printCrawlerResult(printDict)
-                                                
-                                                if matchString not in matchDict:
-                                                    matchDict[matchString] = [str(filePos + item.start())]
-                                                else:
-                                                    matchDict[matchString].extend([str(filePos + item.start())])
+                                                # Check match size
+                                                if len(matchString) > self.matchSize:
+                                                    raise CrawlerMatchError("Match for %s is greater then %d." %(item, self.matchSize))
 
+                                                before = ""
+                                                after  = ""
+
+                                                if self.before > 0:
+                                                    raise CrawlerError("self.before not implemented")
+                                                elif self.after > 0:
+                                                    raise CrawlerError("self.after not implemented")
+                                                    #after = buffer[item.start() + len(matchString): item.start() + len(matchString) + self.after].decode("utf-8")
+                                                
+                                                #printDict = {"file" : file, "ioc" : ioc_type, 
+                                                #            "match": before + matchString + after, "offset": str(filePos + item.start())}
+
+                                                printDict = {"file" : file, "ioc" : ioc_type, "match": matchString, "offset": str(filePos + item.start())}
+
+                                                isWhiteListed = False
+
+                                                if self.whitlist:
+                                                    if matchString in self.whitlist:
+                                                        isWhiteListed = True
+                                                        with self.processedFileCount.get_lock():
+                                                            self.whiteListedMatches.value +=1
+                                                
+                                                if not isWhiteListed:
+                                                    
+                                                    if self.printToStdOut:
+                                                        self._printCrawlerResult(printDict)
+                                                    
+                                                    if matchString not in matchDict:
+                                                        matchDict[before + matchString + after] = [str(filePos + item.start())]
+                                                    else:
+                                                        matchDict[before + matchString + after].extend([str(filePos + item.start())])
+                                            # end try
+                                            except UnicodeDecodeError as ude:
+                                                LOG.debug("Decoding error while Processing %s" %(item))
+                                            except CrawlerMatchError as me:
+                                                with self.processedFileCount.get_lock():
+                                                    self.overMaxMatchSize.value +=1
+                                                LOG.debug(me)
                                         # end if item.start() < pos + bufSize
                                     # end for item in searchRes
 
