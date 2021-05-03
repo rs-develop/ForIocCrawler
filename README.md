@@ -1,6 +1,6 @@
 # ForIocCrawler - A forensic ioc crawler.
 
-This project aims to find IoCs in files, Directories and mounted images. The program uses Regex-Pattern as preset.
+This project aims to find IoCs in files, directories and mounted images. The program uses Regex-Pattern as preset.
 It also have a whitelisting to prevent false positives like version numbers. You can use personal whitelists and
 pattern files. It offers a grep like *stdout* mode and a detailed *forensics* mode.
 
@@ -169,6 +169,12 @@ For version 1.1
 - [X] Implement support for personal pattern file
 - [X] Rename program CSV mode to forensic
 - [X] Implement max match size
+
+Bug fixes 1.1.1
+- [X] Fixed a bug which was caused if the source was a absolute path
+- [X] Added better debug view. Verbose mode shows now a status of long running tasks
+- [X] Changed format of the printing of the runtime
+- [X] Only show relative path (the crawled data) in result
 
 For version 1.2
 - [ ] Search in compressed file formats like zip etc.

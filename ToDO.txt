@@ -70,7 +70,7 @@ Bug fixes
 
     DONE    Changed format of the printing of the runtime
 
-    PROC    Only show relative path (the crawled data) in result
+    DONE    Only show relative path (the crawled data) in result
 
 -------------------------------------------------------------------------------
 Release v 1.1.1                                                DONE
