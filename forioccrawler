@@ -97,7 +97,7 @@ if __name__ == "__main__":
 		argparser.add_argument('-f', dest='FILE_OR_DIR', required=True, action='store', help='File, directory or mount point.')
 		argparser.add_argument("--mode", choices=["stdout","forensics"], dest='output_mode', default='stdout', help='Output mode. Print results to stdout (default) or run in forensics mode with processing status and summary.')
 		argparser.add_argument('--format', choices=result_columns + ["all"], default="all", nargs='+', type=str.lower, help='Printed columns. On default all columns will be printed.')
-		argparser.add_argument('--sections', nargs="+", default="all", help="Print results for specific section(s). Available sections are depending of the pattern file. Default sections: \"%s\"" %" ".join([x.lower() for x in pattern_columns]))
+		argparser.add_argument('--sections', nargs="+", default="all", help="Print results for specific section(s). Available sections are depending on the pattern file. Default sections: \"%s\"" %" ".join([x.lower() for x in pattern_columns]))
 		argparser.add_argument('-o', dest='output_file_name', help='Output file name (works also in stdout mode).')
 		argparser.add_argument('-p', dest='individual_pattern_file', help='Use individual pattern file.')
 		argparser.add_argument('-w', dest='whitelist_file', help='Use individual whitelist file')

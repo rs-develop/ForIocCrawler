@@ -78,6 +78,18 @@ Release v 1.1.1                                                DONE
 
 Release v 1.2 Features
 
+    DONE    Add regex for Crypto currencies
+
+    OPEN    Debug Regex Search. Some data will not be found if it close 
+            to each other. For example domains in python dicts or lists.
+
+    OPEN    Add domains to patterns
+
+    OPEN    Make file or folder (-f argument) a standard argument without
+            add -f
+
+    OPEN    Add possibility to use "." as path for search
+
     OPEN    Search in compressed file formats like zip, tar.gz etc.
 
     OPEN    Search in file formats like pdf word etc.
