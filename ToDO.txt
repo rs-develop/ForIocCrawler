@@ -80,15 +80,27 @@ Release v 1.2 Features
 
     DONE    Add regex for Crypto currencies
 
-    OPEN    Debug Regex Search. Some data will not be found if it close 
-            to each other. For example domains in python dicts or lists.
+    PROC    Debug Regex Search. Some data will not be found if it is close 
+            to an other hit. For example domains in python dicts or lists.
 
-    OPEN    Add domains to patterns
+    DONE    Add domains to patterns
 
-    OPEN    Make file or folder (-f argument) a standard argument without
-            add -f
+    DONE    Make file or folder (-f argument) a standard argument without
+            adding -f
 
-    OPEN    Add possibility to use "." as path for search
+    DONE    Add a switch to enable whitelisting. Whitelisting is deactivated
+            by default.
+
+    DONE    Add arguments to print the path and the content of the default
+            whitelist and pattern file.
+
+    DONE    Improve help messages.
+
+-------------------------------------------------------------------------------
+Release v 1.2                                                  OPEN
+-------------------------------------------------------------------------------
+
+Release v 1.3 Features
 
     OPEN    Search in compressed file formats like zip, tar.gz etc.
 
@@ -97,6 +109,8 @@ Release v 1.2 Features
     OPEN    Add mor export features like json output
 
     OPEN    Optimize multiprocessing based on file size etc.
+
+    OPEN    Current directory "." can bes used as path for search
 
     OPEN    Rewrite how configurations (user settings like format, blocksize 
             for reading etc) will passed to the crawler
@@ -112,5 +126,5 @@ Release v 1.2 Features
     OPEN    Implement support for personal regex
 
 -------------------------------------------------------------------------------
-Release v 1.2                                                  OPEN
+Release v 1.3                                                  OPEN
 -------------------------------------------------------------------------------
