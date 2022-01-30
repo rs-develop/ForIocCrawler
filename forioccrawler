@@ -39,7 +39,7 @@ import timeit		   # for run time
 
 from configparser import ConfigParser, ExtendedInterpolation # for loading config files
 from crawler import crawler
-from crawler.crawlererr import CrawlerError, CrawlerConfigError, CrawlerPatternError, CrawlerExportError, CrawlerFileReadError
+from crawler.crawlererr import CrawlerError, CrawlerConfigError, CrawlerPatternError
 from crawler.exporter import CrawlerExporter
 
 ## --------------------------------------------------------------------------------------------------------------------
@@ -93,21 +93,38 @@ if __name__ == "__main__":
 			raise CrawlerConfigError(getattr(e, 'message', repr(e)))
 
 		# parse arguments
-		argparser = argparse.ArgumentParser(description="IoC crawler for files, directories or mount points.")
-		argparser.add_argument('-f', dest='FILE_OR_DIR', required=True, action='store', help='File, directory or mount point.')
+		argparser = argparse.ArgumentParser(description="IoC crawler for files, directories or mount points.", usage='%(prog)s [options] <file/folder>, type -h for help')
+		argparser.add_argument('source_file_or_dir', help='Source file, directory or mount point.')
 		argparser.add_argument("--mode", choices=["stdout","forensics"], dest='output_mode', default='stdout', help='Output mode. Print results to stdout (default) or run in forensics mode with processing status and summary.')
-		argparser.add_argument('--format', choices=result_columns + ["all"], default="all", nargs='+', type=str.lower, help='Printed columns. On default all columns will be printed.')
-		argparser.add_argument('--sections', nargs="+", default="all", help="Print results for specific section(s). Available sections are depending on the pattern file. Default sections: \"%s\"" %" ".join([x.lower() for x in pattern_columns]))
+		argparser.add_argument('--format', choices=result_columns + ["all"], default="all", nargs='+', type=str.lower, help='Output columns. On default all columns will be printed.')
+		argparser.add_argument('--sections', nargs="+", default="all", help="Print results for specific section(s) of the pattern file. Default sections are: \"%s\"" %" ".join([x.lower() for x in pattern_columns]))
 		argparser.add_argument('-o', dest='output_file_name', help='Output file name (works also in stdout mode).')
-		argparser.add_argument('-p', dest='individual_pattern_file', help='Use individual pattern file.')
-		argparser.add_argument('-w', dest='whitelist_file', help='Use individual whitelist file')
-		argparser.add_argument("-t", "--threads", type=int, default=4, help='Max process count (default=4, max=%d)' % int(config['settings']['max_processes']))
+		argparser.add_argument('-p', dest='individual_pattern_file', help='Use personal pattern file.')
+		argparser.add_argument('-e', dest='enable_whitelisting', action='store_true', help="Enables whitelisting. Use \".forioccrawler --print-whitelist\" to view the content.")
+		argparser.add_argument('-w', dest='individual_whitelist_file', help='Use personal whitelist file')
+		argparser.add_argument("-t", "--threads", type=int, default=4, help='Max process count for multi processing (default=4, max=%d)' % int(config['settings']['max_processes']))
 		argparser.add_argument('-n', action='store_false', dest='match_highlighting', default=True, help="No match highligting")
 		argparser.add_argument('-s', dest='match_size', default=256, type=int, help="Set maximal match size (default=256). Have to be greater then 5.")
 		argparser.add_argument("-v", "--verbose", action = "store_true", help='Show debug messages and write debug log')
+		argparser.add_argument("--print-whitelist", action='store_true', help='Prints the path and the content of the default whitelist.')
+		argparser.add_argument("--print-pattern", action='store_true', help='Prints the path and the content of the default pattern file.')
 		argparser.add_argument("--time", action = "store_true", help='Show run time.')
 		argparser.add_argument("--version", action='version', version=config['settings']['version'], help='Show program version')
 		args = argparser.parse_args()
+
+		# if the print-whitelist argument is set, print the path and the content of the whitlist
+		if args.print_whitelist:
+			print("Path:", whitelist_file)
+			with open(whitelist_file,'r') as f:
+				print(f.read())
+			exit()
+
+		# if the print-whitelist argument is set, print the path and the content of the whitlist
+		if args.print_pattern:
+			print("Path:", pattern_file)
+			with open(pattern_file,'r') as f:
+				print(f.read())
+			exit()
 
 		# if verbose flag is set, set logging to debug
 		if args.verbose:
@@ -166,10 +183,6 @@ if __name__ == "__main__":
 			
 			pattern_file = args.individual_pattern_file
 
-		# if an individual whitelist file is set, change path
-		if args.whitelist_file:
-			whitelist_file = args.whitelist_file
-
 		# check if selected sections is all, then set all sections from the individual pattern file
 		if args.sections == "all":
 			args.sections = pattern_columns
@@ -179,12 +192,24 @@ if __name__ == "__main__":
 					if section not in pattern_columns:
 						raise CrawlerPatternError("Unknown section %s in %s" %(section, pattern_file))
 
+		# if whitelisting is enabled set the path to the default or individual whitelist
+		if args.enable_whitelisting:
+
+			# if an individual whitelist file is set, change path
+			if args.individual_whitelist_file:
+				whitelist_file = args.whitelist_file
+		# If whitelisting is disabled, clear the path
+		else:
+			whitelist_file = ""
+
 		## -------------------------------------------------------------------
 		# run crawler
-		ioccrawler = crawler.Crawler(args.FILE_OR_DIR, args.threads, pattern_file, printToStdout, result_columns, 
+		ioccrawler = crawler.Crawler(args.source_file_or_dir, args.threads, pattern_file, printToStdout, result_columns, 
 									 args.sections, args.match_highlighting, args.match_size, whitelist_file, 0, 0)
 		ioccrawler.do()
 		## -------------------------------------------------------------------
+
+		print('[+] Writing Export')
 
 		# check the export option
 		if args.output_file_name:
@@ -200,7 +225,7 @@ if __name__ == "__main__":
 		if not printToStdout:
 			
 			summary = ioccrawler.getResultSummary()
-			print("[+] Summary of unique matches")
+			print("[+] Summary of matches")
 			for ioc in summary:
 				print(" |- %s: %s" %(ioc, summary[ioc]))
 		
