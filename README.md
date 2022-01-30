@@ -4,7 +4,7 @@ This project aims to find IoCs in files, directories and mounted images. The cor
 It also have a whitelisting feature to prevent false positives like version numbers, local ip addresses etc. You can use a individual whitelist config to adjust
 the results to your need. You can also define individual pattern files. The result will be presented either as console output or as csv export.
 The program provides two modes: *stdout* mode and a detailed *forensics* mode.
-The IoC Crawler for example can be used, to get an overview of linux server images to extract possible attack vectors.
+The IoC Crawler for example can be used, to get an overview of linux server images to extract possible attack vectors. The whitelist feature can be used to prevent to search for IoCs in irrelevant directories like `/lib/firmware` or `/dev`.
 
 ## Features:
 
@@ -112,6 +112,7 @@ default pattern and whitelist file or create a individual file by your own.
 
 Whitelisting is disabled by default. To enable whitelisting use the `-e` argument. Trough whitelisting the amount of false positives and unwanted matches will be noticeable decreaced.
 To create your own whitelist file, define a section and add an key and a value.
+Whitlisting has also good potential on large images from server filesystems etc. It can be used to whitelist whole directories.
 
 To use your whitelist file type: `forioccrawler -f file.bin -w mywhitelist.ini -e`
 
@@ -217,6 +218,7 @@ For version 1.2
 - [ ] Implement a whitelist contains feature. Whitelisting for files or matches which contains a specific string.
 - [ ] Implement support for personal regex
 - [ ] Implement a feature to print bytes before and after a match
+- [ ] Test the Crawler on Windows images
 
 ## Contact
 

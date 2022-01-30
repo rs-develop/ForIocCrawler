@@ -125,6 +125,8 @@ Release v 1.2 Features
         
     OPEN    Implement support for personal regex
 
+    OPEN    Test the crawler on Windows images
+
 -------------------------------------------------------------------------------
 Release v 1.2                                                  OPEN
 -------------------------------------------------------------------------------
