@@ -52,7 +52,7 @@ class Crawler():
 
             # check path of source dir
             if not os.path.exists(pathSrc):
-                raise CrawlerFileReadError("File not found.", os.path.basename(pathSrc))
+                raise CrawlerFileReadError("File not found.", pathSrc)
             if not os.path.isabs(pathSrc):
                 self.rootFilePath = os.path.abspath(pathSrc)
             else:
@@ -75,15 +75,18 @@ class Crawler():
             # load whitelist
             if whitelistSrc:
                 self.whitlist = self._loadWhitelist(whitelistSrc)
-                LOG.debug('Whitelist loaded')
+                self._printCrawlerMessage('[+] Whitelisting is enabled')
             else:
-                LOG.debug('No whitelist')
+                self._printCrawlerMessage('[+] Whitelisting is disabled')
             
             # check files
             self._printCrawlerMessage('[+] Checking files')
             self.fileList = self._readFiles(self.rootFilePath, self.rootRelPath)
             self.fileListSize = len(self.fileList)
-            self._printCrawlerMessage(" |- %d files found, %d whitelisted." %(self.fileListSize, self.whitlistedFiles))
+            if self.whitlist:
+                self._printCrawlerMessage(" |- %d files found, %d whitelisted." %(self.fileListSize, self.whitlistedFiles))
+            else:
+                self._printCrawlerMessage(" |- %d files found." %(self.fileListSize))
             LOG.debug("%d files found for processing" %(self.fileListSize))
 
         except CrawlerFileReadError as re:
@@ -178,7 +181,7 @@ class Crawler():
         return filesList
     # end _readFiles
 
-    ### Returns a summary to all found ioc types and the count of matches
+    ## Returns a summary to all found ioc types and the count of matches
     #   - checks the white listed file count
     #   - checks the white listed matches count
     #   @return List of strings
@@ -189,18 +192,13 @@ class Crawler():
             if self.whitlistedFiles > 0:
                 summaryDict["Whitelisted files"] = self.whitlistedFiles
             if self.whiteListedMatches.value > 0:
-                summaryDict["Whitelisted matches"] = self.whiteListedMatches.value
+                summaryDict["Filtered matches trough whitelisting"] = self.whiteListedMatches.value
             if self.overMaxMatchSize.value > 0:
                 summaryDict["Matchs above the max match size"] = self.whiteListedMatches.value
-        # end if self.whitlist
 
         for item in self.resultList:
-            for key in item.mCount.keys():
-                if key not in summaryDict:
-                    summaryDict[key] = item.mCount[key]
-                else:
-                    summaryDict[key] = summaryDict[key] + item.mCount[key]
-        # end for
+            for ioc in item.mCount:
+                summaryDict[ioc] = item.mCount[ioc]
 
         return summaryDict
     # end def getResultSummary
@@ -227,7 +225,7 @@ class Crawler():
                         if fileSize < bufSize:
                             bufSize = fileSize
                             overlap = 0
-                        
+                        dbgCOUNTER = 0
                         # read the file in blocks
                         while filePos < fileSize:
 
@@ -280,7 +278,6 @@ class Crawler():
                                                             self.whiteListedMatches.value +=1
                                                 
                                                 if not isWhiteListed:
-                                                    
                                                     if self.printToStdOut:
                                                         self._printCrawlerResult(printDict)
                                                     
@@ -311,6 +308,7 @@ class Crawler():
                                 filePos = f.tell()
                         
                         # end while filePos < fileSize:
+
                     # end with file
 
                     # add crawler file value object to the result list
@@ -355,7 +353,7 @@ class Crawler():
             if self.fileListSize < 1:
                 raise CrawlerFileReadError("No files to read.")
 
-            # Calc block size
+            # Calc block size based on the file count
             blockSize = 0
             if self.fileListSize < 10:
                 blockSize = self.fileListSize
@@ -398,10 +396,12 @@ class Crawler():
 
             # do post processing
             self.resultList.extend(shared_list)
-            self._printCrawlerMessage("[+] Finished processing.")
+            self._printCrawlerMessage("[+] Finished processing")
 
         except Exception as e:
             raise CrawlerError("Error in do function. " + getattr(e, 'message', repr(e)))
+        except CrawlerProcessError as pe:
+            raise pe
         except KeyboardInterrupt:
             print("[!] User interrupt.")
             try:
