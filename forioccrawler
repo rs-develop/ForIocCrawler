@@ -66,6 +66,7 @@ if __name__ == "__main__":
 
 	try:
 
+		# attributes
 		printToStdout   = False
 		basedir         = os.path.dirname(os.path.abspath(__file__))
 		result_columns  = []
@@ -93,149 +94,181 @@ if __name__ == "__main__":
 			raise CrawlerConfigError(getattr(e, 'message', repr(e)))
 
 		# parse arguments
-		argparser = argparse.ArgumentParser(description="IoC crawler for files, directories or mount points.", usage='%(prog)s [options] <file/folder>, type -h for help')
-		argparser.add_argument('source_file_or_dir', help='Source file, directory or mount point.')
-		argparser.add_argument("--mode", choices=["stdout","forensics"], dest='output_mode', default='stdout', help='Output mode. Print results to stdout (default) or run in forensics mode with processing status and summary.')
-		argparser.add_argument('--format', choices=result_columns + ["all"], default="all", nargs='+', type=str.lower, help='Output columns. On default all columns will be printed.')
-		argparser.add_argument('--sections', nargs="+", default="all", help="Print results for specific section(s) of the pattern file. Default sections are: \"%s\"" %" ".join([x.lower() for x in pattern_columns]))
-		argparser.add_argument('-o', dest='output_file_name', help='Output file name (works also in stdout mode).')
-		argparser.add_argument('-p', dest='individual_pattern_file', help='Use personal pattern file.')
-		argparser.add_argument('-e', dest='enable_whitelisting', action='store_true', help="Enables whitelisting. Use \".forioccrawler --print-whitelist\" to view the content.")
-		argparser.add_argument('-w', dest='individual_whitelist_file', help='Use personal whitelist file')
-		argparser.add_argument("-t", "--threads", type=int, default=4, help='Max process count for multi processing (default=4, max=%d)' % int(config['settings']['max_processes']))
-		argparser.add_argument('-n', action='store_false', dest='match_highlighting', default=True, help="No match highligting")
-		argparser.add_argument('-s', dest='match_size', default=256, type=int, help="Set maximal match size (default=256). Have to be greater then 5.")
-		argparser.add_argument("-v", "--verbose", action = "store_true", help='Show debug messages and write debug log')
-		argparser.add_argument("--print-whitelist", action='store_true', help='Prints the path and the content of the default whitelist and exits.')
-		argparser.add_argument("--print-pattern", action='store_true', help='Prints the path and the content of the default pattern file and exits.')
-		argparser.add_argument("--time", action = "store_true", help='Show run time.')
-		argparser.add_argument("--version", action='version', version=config['settings']['version'], help='Show program version')
-		args = argparser.parse_args()
+		parser = argparse.ArgumentParser(description="IoC crawler for files, directories or mount points.", usage='%(prog)s -h/--help for help')
+		
+		# Create Subparser
+		subparsers = parser.add_subparsers(help='sub-command help')
 
-		# if the print-whitelist argument is set, print the path and the content of the whitlist
-		if args.print_whitelist:
-			print("Path:", whitelist_file)
-			with open(whitelist_file,'r') as f:
-				print(f.read())
+		# Create Subparser for the ioc crawler
+		ioc_crawler_parser = subparsers.add_parser('parse', help='Subcommand for ioc crawler')
+		ioc_crawler_parser.add_argument('source_file_or_dir', help='Source file, directory or mount point.')
+		ioc_crawler_parser.add_argument('-c', '--columns', choices=result_columns + ["all"], default="all", nargs='+', type=str.lower, help='Output columns. All columns will be printed by default.')
+		ioc_crawler_parser.add_argument('-t', '--type', nargs="+", default="all", help="Print only the provided pattern types. Available pattern types are: \"%s\"" %" ".join([x.lower() for x in pattern_columns]))
+		ioc_crawler_parser.add_argument('-m', '--mode', choices=["stdout","forensics"], default='stdout', help='Output mode. Print results to stdout (default) or run in forensics mode with processing status and summary.')
+		ioc_crawler_parser.add_argument('-o', '--out',  dest='output_file_name', help='Output file name (works also in stdout mode).')
+		ioc_crawler_parser.add_argument('-e', dest='enable_whitelisting', action='store_true', help="Enables whitelisting. Use \".forioccrawler config --print-whitelist\" to view the content of the default whitelist.")
+		ioc_crawler_parser.add_argument('-w', dest='individual_whitelist_file', help='Use personal whitelist file')
+		ioc_crawler_parser.add_argument('-p', dest='individual_pattern_file', help='Use personal pattern file.')
+		ioc_crawler_parser.add_argument('--threads', type=int, default=4, help='Max process count for multi processing (default=4, max=%d)' % int(config['settings']['max_processes']))
+		ioc_crawler_parser.add_argument('-n', action='store_false', dest='match_highlighting', default=True, help="No match highligting")
+		ioc_crawler_parser.add_argument('-s', dest='match_size', default=256, type=int, help="Set maximal match size (default=256). Have to be greater then 5.")
+		ioc_crawler_parser.add_argument("-v", "--verbose", action = "store_true", help='Show debug messages and write debug log')
+		ioc_crawler_parser.add_argument("--time", action = "store_true", help='Show run time.')
+
+		# Create Subparser for config
+		config_parser = subparsers.add_parser('config', help='Subcommand for configuration informations')
+		config_parser.add_argument("--print-whitelist", action='store_true', help='Prints the path and the content of the default whitelist and exits.')
+		config_parser.add_argument("--print-pattern", action='store_true', help='Prints the path and the content of the default pattern file and exits.')
+		
+		# Create Subparser for version
+		version_parser = subparsers.add_parser('version', help='Subcommand for version information')
+		version_parser.add_argument('--show', action='store_true', help='Show program version')
+		
+		# Parse Arguments
+		args = parser.parse_args()
+
+		# If no argument is privided, show help and exit
+		if len(sys.argv) < 2:
+			parser.print_help()
 			exit()
 
-		# if the print-whitelist argument is set, print the path and the content of the whitlist
-		if args.print_pattern:
-			print("Path:", pattern_file)
+		# Show Program Version
+		if 'show' in vars(args):
+			print(config['settings']['version'])
+			exit()
+
+		# If the config argument is provided, show configs
+		elif 'config' in sys.argv:
+			if not args.print_pattern and not args.print_whitelist:
+				config_parser.print_help()
+				exit()
+			else:
+				if args.print_pattern:
+					print("Path:", pattern_file)
+					with open(pattern_file,'r') as f:
+						print(f.read())
+					exit()
+				if args.print_whitelist:
+					print("Path:", pattern_file)
 			with open(pattern_file,'r') as f:
 				print(f.read())
 			exit()
-
-		# if verbose flag is set, set logging to debug
-		if args.verbose:
-			LOG.setLevel(logging.DEBUG)
-
-			# Create debug log handler for console
-			debug_log = logging.StreamHandler()
-			debug_log.setLevel(logging.DEBUG) # log only debug
-			debug_log.setFormatter(logging.Formatter('DEBUG %(asctime)-15s %(processName)s %(module)s %(lineno)d %(message)s'))
-
-			# Create file log handler for debug
-			if os.path.exists('debug.log'):
-				os.remove('debug.log')
-			fh_debug = logging.FileHandler('debug.log')
-			fh_debug.setLevel(logging.DEBUG) # log only debug
-			fh_debug.setFormatter(logging.Formatter('DEBUG %(asctime)-15s %(processName)s %(module)s %(lineno)d %(message)s'))
-
-			# Add log handler
-			LOG.addHandler(debug_log)
-			LOG.addHandler(fh_debug)
-			
-			# set timer for run time
-			start = timeit.default_timer()
-
-			LOG.debug("Debug initialisation finished")
-			LOG.debug("Arguments: %s" %str(args))
-
-		# if time arg, show run time at the end
-		elif args.time:
-			start = timeit.default_timer()
-
-		# check program mode
-		if args.output_mode not in ["forensics", "stdout"]:
-			argparser.print_help()
-			raise CrawlerError("Unknown format: %s." %args.output_mode)
-		elif args.output_mode == "forensics" and args.output_file_name == None:
-			argparser.print_help()
-			raise CrawlerError("Forensics-Mode requires a output file name.")
-
-		# check for stdout option and reset output path
-		if args.output_mode == "stdout":
-			printToStdout = True
-
-		# check format options for reslult columns
-		if args.format != "all":
-			result_columns = args.format
-
-		# if an individual pattern file is set, check sections
-		if args.individual_pattern_file:
-			try:
-				pattern = ConfigParser(interpolation=ExtendedInterpolation())
-				pattern.read(args.individual_pattern_file)
-				pattern_columns = [x.lower() for x in pattern.sections()]
-			except Exception as e:
-				raise CrawlerPatternError(getattr(e, 'message', repr(e)))
-			
-			pattern_file = args.individual_pattern_file
-
-		# check if selected sections is all, then set all sections from the individual pattern file
-		if args.sections == "all":
-			args.sections = pattern_columns
-		# if not all is set, check if the sections is present in the pattern file, if not: throw exception
-		else:
-			for section in args.sections:
-					if section not in pattern_columns:
-						raise CrawlerPatternError("Unknown section %s in %s" %(section, pattern_file))
-
-		# if whitelisting is enabled set the path to the default or individual whitelist
-		if args.enable_whitelisting:
-
-			# if an individual whitelist file is set, change path
-			if args.individual_whitelist_file:
-				whitelist_file = args.whitelist_file
-		# If whitelisting is disabled, clear the path
-		else:
-			whitelist_file = ""
-
-		## -------------------------------------------------------------------
-		# run crawler
-		ioccrawler = crawler.Crawler(args.source_file_or_dir, args.threads, pattern_file, printToStdout, result_columns, 
-									 args.sections, args.match_highlighting, args.match_size, whitelist_file, 0, 0)
-		ioccrawler.do()
-		## -------------------------------------------------------------------
-
-		print('[+] Writing Export')
-
-		# check the export option
-		if args.output_file_name:
-			CrawlerExporter.csvExport(args.output_file_name, ioccrawler.resultList, result_columns)
-			print('[+] Results written to: %s' %(args.output_file_name))
-
-		# show run time
-		if args.time or args.verbose:
-			stop = timeit.default_timer()
-			print('[+] Jobs finished in: %s (H:MM:SS)' %(convertTime(stop - start)))
-
-		# show summary if not printed to stdout
-		if not printToStdout:
-			
-			summary = ioccrawler.getResultSummary()
-			print("[+] Summary of matches")
-			for ioc in summary:
-				print(" |- %s: %s" %(ioc, summary[ioc]))
 		
+		
+		elif 'parse' in sys.argv:
+
+			# if verbose flag is set, set logging to debug
+			if args.verbose:
+				LOG.setLevel(logging.DEBUG)
+
+				# Create debug log handler for console
+				debug_log = logging.StreamHandler()
+				debug_log.setLevel(logging.DEBUG) # log only debug
+				debug_log.setFormatter(logging.Formatter('DEBUG %(asctime)-15s %(processName)s %(module)s %(lineno)d %(message)s'))
+
+				# Create file log handler for debug
+				if os.path.exists('debug.log'):
+					os.remove('debug.log')
+				fh_debug = logging.FileHandler('debug.log')
+				fh_debug.setLevel(logging.DEBUG) # log only debug
+				fh_debug.setFormatter(logging.Formatter('DEBUG %(asctime)-15s %(processName)s %(module)s %(lineno)d %(message)s'))
+
+				# Add log handler
+				LOG.addHandler(debug_log)
+				LOG.addHandler(fh_debug)
+				
+				# set timer for run time
+				start = timeit.default_timer()
+
+				LOG.debug("Debug initialisation finished")
+				LOG.debug("Arguments: %s" %str(args))
+
+			# if time arg, show run time at the end
+			elif args.time:
+				start = timeit.default_timer()
+
+			# check program mode
+			if args.mode not in ["forensics", "stdout"]:
+				ioc_crawler_parser.print_help()
+				raise CrawlerError("Unknown program mode: %s." %args.mode)
+			elif args.mode == "forensics" and args.output_file_name == None:
+				ioc_crawler_parser.print_help()
+				raise CrawlerError("Forensics-Mode requires an output file. (try -o)")
+
+			# check for stdout option and reset output path
+			if args.mode == "stdout":
+				printToStdout = True
+
+			# check format options for reslult columns
+			if args.columns != "all":
+				result_columns = args.columns
+
+			# if an individual pattern file is set, check pattern
+			if args.individual_pattern_file:
+				try:
+					pattern = ConfigParser(interpolation=ExtendedInterpolation())
+					pattern.read(args.individual_pattern_file)
+					pattern_columns = [x.lower() for x in pattern.sections()]
+				except Exception as e:
+					raise CrawlerPatternError(getattr(e, 'message', repr(e)))
+				
+				pattern_file = args.individual_pattern_file
+
+			# check if selected pattern type is "all", then set all pattern from the individual pattern file
+			if args.type == "all":
+				args.type = pattern_columns
+			# if not all is set, check if the pattern is present in the pattern file, if not: throw exception
+			else:
+				for pattern in args.type:
+						if pattern not in pattern_columns:
+							raise CrawlerPatternError("Unknown pattern %s in %s" %(pattern, pattern_file))
+
+			# if whitelisting is enabled set the path to the default or individual whitelist
+			if args.enable_whitelisting:
+
+				# if an individual whitelist file is set, change path
+				if args.individual_whitelist_file:
+					whitelist_file = args.whitelist_file
+			# If whitelisting is disabled, clear the path
+			else:
+				whitelist_file = ""
+
+			## -------------------------------------------------------------------
+			# run crawler
+			ioccrawler = crawler.Crawler(args.source_file_or_dir, args.threads, pattern_file, printToStdout, result_columns, 
+										args.type, args.match_highlighting, args.match_size, whitelist_file, 0, 0)
+			ioccrawler.do()
+			## -------------------------------------------------------------------
+
+			# check the export option
+			if args.output_file_name:
+				print('[+] Writing Export')
+				CrawlerExporter.csvExport(args.output_file_name, ioccrawler.resultList, result_columns)
+				print('[+] Results written to: %s' %(args.output_file_name))
+
 			# show run time
 			if args.time or args.verbose:
 				stop = timeit.default_timer()
 				print('[+] Jobs finished in: %s (H:MM:SS)' %(convertTime(stop - start)))
-		
-			print("[+] Done")
-		# end if
+
+			# show summary if not printed to stdout
+			if not printToStdout:
+				
+				summary = ioccrawler.getResultSummary()
+				print("[+] Summary of matches")
+				for ioc in summary:
+					print(" |- %s: %s" %(ioc, summary[ioc]))
+			
+				# show run time
+				if args.time or args.verbose:
+					stop = timeit.default_timer()
+					print('[+] Jobs finished in: %s (H:MM:SS)' %(convertTime(stop - start)))
+			
+				print("[+] Done")
+			# end if
+
+		else:
+			CrawlerError("Invalid Argument error")
 
 	# Handle errors
 	except CrawlerError as err:
