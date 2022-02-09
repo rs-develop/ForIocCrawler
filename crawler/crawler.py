@@ -46,6 +46,7 @@ class Crawler():
             self.before             = beforeSrc
             self.after              = afterSrc
             self.matchSize          = matchSizeSrc
+            self.beginnRootRelPath  = 0
 
             self._printCrawlerMessage('[+] Init Crawler')
             LOG.debug("Init Crawler")
@@ -61,6 +62,7 @@ class Crawler():
             # set relative path
             if self.rootFilePath != pathSrc:
                 self.rootRelPath = os.path.relpath(pathSrc)
+                self.beginnRootRelPath = len(self.rootFilePath)-len(self.rootRelPath)
             else:
                 self.rootRelPath = pathSrc
 
@@ -198,7 +200,10 @@ class Crawler():
 
         for item in self.resultList:
             for ioc in item.mCount:
-                summaryDict[ioc] = item.mCount[ioc]
+                if ioc in summaryDict.keys():
+                    summaryDict[ioc] = summaryDict[ioc] + item.mCount[ioc]
+                else:
+                    summaryDict[ioc] = item.mCount[ioc]
 
         return summaryDict
     # end def getResultSummary
@@ -212,7 +217,7 @@ class Crawler():
             for file in blockFiles:
                 try:
                     # create value object for the results - save only the relative path to the results
-                    cvo = CrawlerVo(file[len(self.rootRelPath):])
+                    cvo = CrawlerVo(file[self.beginnRootRelPath:])
 
                     with open(file, 'rb') as f:
                         LOG.debug("Processing %s" %(file))
@@ -225,7 +230,7 @@ class Crawler():
                         if fileSize < bufSize:
                             bufSize = fileSize
                             overlap = 0
-                        dbgCOUNTER = 0
+                        
                         # read the file in blocks
                         while filePos < fileSize:
 
@@ -263,11 +268,12 @@ class Crawler():
                                                     raise CrawlerError("self.after not implemented")
                                                     #after = buffer[item.start() + len(matchString): item.start() + len(matchString) + self.after].decode("utf-8")
                                                 
+                                                # maybe feature in one of the next versions
                                                 #printDict = {"file" : file, "ioc" : ioc_type, 
                                                 #            "match": before + matchString + after, "offset": str(filePos + item.start())}
 
                                                 # hint: save only relative path
-                                                printDict = {"file" : file[len(self.rootRelPath):], "ioc" : ioc_type, "match": matchString, "offset": str(filePos + item.start())}
+                                                printDict = {"file" : file[self.beginnRootRelPath:], "ioc" : ioc_type, "match": matchString, "offset": str(filePos + item.start())}
 
                                                 isWhiteListed = False
 
