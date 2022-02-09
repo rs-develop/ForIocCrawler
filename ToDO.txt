@@ -102,9 +102,21 @@ Release v 1.1.2                                                  DONE
 
 Release v 1.2 Features
 
+    DONE    Refactor command line arguments for a simpler usability
+
+    OPEN    Fix a output bug which causes a wrong count number of matched iocs
+            in forensic mode
+
+-------------------------------------------------------------------------------
+Release v 1.1.2                                                  OPEN
+-------------------------------------------------------------------------------
+
+Release v 1.3 Features
+
     OPEN    Search in compressed file formats like zip, tar.gz etc.
 
     OPEN    Search in file formats like pdf word etc.
+            Test with Security Reports.
 
     OPEN    Add mor export features like json output
 
@@ -128,5 +140,5 @@ Release v 1.2 Features
     OPEN    Test the crawler on Windows images
 
 -------------------------------------------------------------------------------
-Release v 1.2                                                  OPEN
+Release v 1.3                                                  OPEN
 -------------------------------------------------------------------------------
