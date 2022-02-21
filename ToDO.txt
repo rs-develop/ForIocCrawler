@@ -106,9 +106,11 @@ Release v 1.2 Features
 
     OPEN    Fix a output bug which causes a wrong count number of matched iocs
             in forensic mode
+        
+    
 
 -------------------------------------------------------------------------------
-Release v 1.1.2                                                  OPEN
+Release v 1.2                                                    OPEN
 -------------------------------------------------------------------------------
 
 Release v 1.3 Features
