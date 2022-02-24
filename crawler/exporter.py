@@ -22,7 +22,7 @@ class CrawlerExporter:
 
                 # get and write results
                 for fileResult in exportListSrc:
-                    tmpDict = {"file" : fileResult.path}
+                    tmpDict = {"path" : fileResult.path}
                     for ioc in fileResult.mResults:
                         tmpDict["ioc"] = ioc
                         for entry in fileResult.mResults[ioc]:
