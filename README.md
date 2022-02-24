@@ -1,12 +1,19 @@
 # ForIocCrawler - A forensic ioc crawler.
 
-This project aims to find IoCs in files, directories and mounted images. The core of the program is the use of pre defined regex to match common ioc types.
-It also have a whitelisting feature to prevent false positives like version numbers, local ip addresses etc. You can use a individual whitelist config to adjust
-the results to your need. You can also define individual pattern files. The result will be presented either as console output or as csv export.
-The program provides two modes: *stdout* mode and a detailed *forensics* mode.
-The IoC Crawler for example can be used, to get an overview of linux server images to extract possible attack vectors. The whitelist feature can be used to prevent to search for IoCs in irrelevant directories like `/lib/firmware` or `/dev`.
+This project aims to find IoCs in files, directories and mounted images directories and to get an overview of large amounts of data. 
+The core of the crawler is the use of pre defined regex to match common ioc types.
+It also has a whitelisting feature to prevent common false positives like version numbers, local ip addresses etc. 
+Using the whitelisting feature it is possible to hide known good indicators and to reduce a huge amount of data and matches to a manageable count for analysis. 
+To adjust the *forioccrawler* and its output to your needs in a specific case, you can use a individual whitelist config.
+It is also possible to define individual pattern files to find additional IoCs.
+The program provides two modes: 
+- the *stdout* mode and 
+- a detailed *forensics* mode.
 
-## Features:
+A conceivable use case of the *forioccrawler* is to get an overview of linux server images or a logical copy of a filesystem. It extracts IoCs and provides an simple overview of the data. 
+On every matched IoC the path and the offset is specified. The whitelist feature can be used to prevent to search for IoCs in irrelevant directories like `/lib/firmware` or `/dev`.
+
+## Features
 
 - pure python3 no dependencies
 - finds IP-Adresses, URLs, Domains, E-mail-Adresses, Windows Regestry Keys etc. in
@@ -17,7 +24,7 @@ The IoC Crawler for example can be used, to get an overview of linux server imag
 - supports to filter for single IoCs like only IPs
 - Output to stdout or export data to csv-file 
 - match highligting
-- match offset
+- match file offset
 - individual whitelisting
 - individual pattern
 - set a maximum match size
@@ -31,34 +38,45 @@ Install using pip3:<br>
 Upgrade using pip3:<br>
 `pip3 install forioccrawler -U`
 
-## Quick Start
+## Main Commands
+
+The forioccrawler has three main commands:
+- parse - Subcommand for parsing files and directories
+- config - Subcommand for showing the content of the default pattern and whitelist file
+- version - Subcommand for showing the program version
+
+## Quick Start Guide for parsing
 
 Simple run over a file. The output of the results will printed to *stdout*.<br>
-`forioccrawler evil.exe`
+`forioccrawler parse evil.exe`
 
-For show matches only, you have to use the *format* argument and the match keyword.<br>
-`forioccrawler file.txt --format match`
+Print matches only. Specify the column. Available columns are: [file, ioc, match, offset]. On default all columns are printed.<br>
+`forioccrawler parse file.txt -c match`
 
-You can also add more *format* options if you like. Its also possible to mix them up. The following command outputs the match and the offset of the match in the file<br>
-`forioccrawler evil.exe --format match offset`
+It is also possible to ajust the columns to your needs.<br>
+`forioccrawler parse evil.exe -c match offset`
 
-To search only for urls, you can use the *sections* arguments. Multiple options are allowed.<br>
-`forioccrawler iocs.txt --sections url`
+To search only for urls, you can use the *type* argument. Multiple options are allowed.<br>
+`forioccrawler parse iocs.txt --type url`
+`forioccrawler parse iocs.txt --t url`
 
 Print the matches on stdout and write them to file.<br>
-`forioccrawler iocs.txt --format ioc match offset -o output_file.csv`
+`forioccrawler parse iocs.txt --columns ioc match -o output_file.csv`
+`forioccrawler parse iocs.txt -c ioc match -o output_file.csv`
 
-All mentioned arguments are usable with huge directories or mount points with a lot of files using the forensics mode.<br>
-`forioccrawler /mnt/server_image --format ioc match offset --mode forensics -o output_file.csv`
+All mentioned arguments can also be used with directories or mount points. For better processing overview the forensic mode can be used.<br>
+`forioccrawler parse /mnt/server_image -c ioc match offset --mode forensics -o output_file.csv`
 
-Set a individual pattern and whitelist file:<br>
-`forioccrawler /home/user/Downloads -w mywhitelist.ini -p mypattern.ini`
+Enable whitelisting (Default whitelist).<br>
+`forioccrawler parse /mnt/server_image --whitelist`
 
-To enable whitelisting use the `-e` argument.<br>
-`forioccrawler iocs.txt -e`
+Set a individual pattern and/or whitelist file.<br>
+`forioccrawler parse /home/user/Downloads --load-whitelist myWhitelist.ini --load-pattern mypattern.ini`
+`forioccrawler parse /home/user/Downloads --load-pattern mypattern.ini`
+`forioccrawler parse /home/user/Downloads --load-whitelist myWhitelist.ini`
 
-For processing large files you can use the verbose flag to check the crawler status:<br>
-`forioccrawler large.txt -e -v`
+For processing large files, you can use the forensics mode and the verbose flag to check the status of the crawler.<br>
+`forioccrawler parse large.txt -m forensics -v -o out.txt`
 
 ## Program modes
 
@@ -66,9 +84,9 @@ The programm provides two modes:
 * stdout printing mode (default)
 * forensics
 
-The *stdout* modes is discribed above in the Quick Start section. The *forensics* mode is a good choise for processing large 
-directories or mount points. Its also good to use for processing large files. 
-It comes with a better overview: file count, processing status and an ioc summary.
+The *stdout* mode is demonstrated above in the Quick Start section. The *forensics* mode is a good choise for processing large files,
+directories or mount points.
+It shows a better overview: file count, processing status and an ioc summary after finishing the processing.
 
 ***Example output of the forensics mode***
 ```
@@ -84,7 +102,7 @@ It comes with a better overview: file count, processing status and an ioc summar
  |- Processed files: 42 / 42 [100.0 %]
 [+] Finished processing
 [+] Writing Export
-[+] Results written to: tests/out.csv
+[+] Results written to: results.csv
 [+] Summary of matches
  |- Filtered matches trough whitelisting: 9896
  |- URL: 1
@@ -96,25 +114,32 @@ It comes with a better overview: file count, processing status and an ioc summar
 
 ## Verbose mode
 
-The verbose mode *-v* provides a more detailed output. In addition debug file will be written to the current directory.
+The verbose mode `-v`, `--verbose` provides a more detailed output. In addition, a debug file will be written to the current directory.
 In verbose mode whitelisted files (path + name), loaded pattern count, errors, a detailed processing log etc. is printed.
 It also tells you which file and process causes a long runtime.
 
 ## Whitelisting and Pattern
 
-The machanism is based of *ini* files. There is one *ini* file for whitelisting and one for pattern by default. The basic functionality 
-is based of regular expressions and supports by default IoCs like IP, URL etc. and a tailored whitelisting. You can either edit the 
-default pattern and whitelist file or create a individual file by your own.
+The pattern and whitlisting files are based of *ini* files. There is one *ini* file for whitelisting and one for pattern by default. The functionality 
+is based on regular expression and supports by default IoCs like IP, URL etc. and a whitelisting for known good or files, which causes a high false positive risk. 
 
 ## Writing a personal whitelisting and pattern file
 
 ###### Whitelisting
 
-Whitelisting is disabled by default. To enable whitelisting use the `-e` argument. Trough whitelisting the amount of false positives and unwanted matches will be noticeable decreaced.
-To create your own whitelist file, define a section and add an key and a value.
-Whitlisting has also good potential on large images from server filesystems etc. It can be used to whitelist whole directories.
+Whitelisting is disabled by default. To enable whitelisting use the `-w`, `--whitelist` argument. Using whitelisting the amount of false positives and known good matches will be decreaced.
+If whitelisting is enabled, the crawler checks if a part of the path of the current file or part of the current match is found in the whitelist.
 
-To use your whitelist file type: `forioccrawler -f file.bin -w mywhitelist.ini -e`
+**Example 1**
+You have the match `192.168.1.122` for the IP pattern. The crawler checks the whitelist and finds the string `192.168.`. Because the crawler looks not for full whitelist matches but for parts, the match will not counted and is whitelisted. If you only wanna whitelist adresses like `192.168.2.xxx`, you have to change the whitelist entry to `192.168.2`
+
+To create your own whitelist file, define a section and add entries to the section.
+
+To use your whitelist file, add the `--load-whitelist` argument: `forioccrawler parse file.bin --load-whitelist myWhitelist.ini`. 
+If you load your own whitelist, you dont have to enable whitelisting seperately.
+Alternativ you can permanently add your whitelist to the crawler for using it by default `forioccrawler config --set-whitelist myWhitelist.ini`.
+
+Below you can find an example for a whitelist file. Using the `forioccrawler config --print-whitelist` command, you can print the default whitelist.
 
 ```
 # my whitelist file
@@ -128,12 +153,16 @@ windows: C:\Windows
          Users/user/Desktop
 ```
 
-Using the `--print-whitelist` argument, you can print the path and the content of the default whitelist.
-
 ###### Pattern
 
-Patterns are the core functionality of the ioc crawler. Is one of your expressions are incorrect an error message will be written into the log file. To create a log file use the verbose mode. 
-To create a individual pattern file, you have to define a Section. Every Section consists of one or more key and value pairs.
+Patterns are the core functionality of the ioc crawler. Is one of your match expressions are incorrect an error message will be written into the log file. 
+To create a log file use the verbose mode (`-v`, `--verbose`).
+To create a individual pattern file, you have to define pattern sections. Every section consists of one or more key:value pairs.
+
+To use your personal pattern file, add the `--load-pattern` argument: `forioccrawler parse file.bin --load-pattern myPattern.ini`.
+To use your pattern everytime you use the crawler, add it as default: `forioccrawler config --set-pattern myPattern.ini`.
+
+Using the `forioccrawler config --print-pattern` argument, you can print the path and the content of the default pattern.
 
 In the following an example for an individual pattern file is shown.
 ```
@@ -141,82 +170,35 @@ In the following an example for an individual pattern file is shown.
 [DATE_OF_INTEREST]
 datetime : (2018\-[0-9]{2}\-[0-9]{2} [01][0-9]\:[0-9]{2}:[0-9]{2})
 
-[SPEZIAL_REQUEST]
+[SPECIAL_REQUEST]
 value : (GET\srequest\sfor\member.php\s.{3,})"
 ```
-To use your own pattern file execute: `forioccrawler -f file.bin -p mypattern.ini`
 
-Using the `--print-pattern` argument, you can print the path and the content of the default whitelist.
+## Config Menu
+
+The config menu allows you to change crawler settings, the default whitelist and pattern file and the default thread count.
+You can print the current configuration using `forioccrawler config --show`.
+In addition to change the default pattern und whitelist file, you can restore the default configuration of the crawler.
 
 ## Program help
 
-The `--help` command shows you the following help message:
+The crawler have two main sub menus: `parse` and `config`.
+To see the help for the parse menu type: `forioccrawler parse -h`.
+To see the help for the config menu type: `forioccrawler config`.
 
-```
-usage: forioccrawler [options] <file/folder>, type -h for help
+## Version
 
-IoC crawler for files, directories or mount points.
-
-positional arguments:
-  source_file_or_dir    Source file, directory or mount point.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --mode {stdout,forensics}
-                        Output mode. Print results to stdout (default) or run in forensics mode with processing status and summary.
-  --format {file,ioc,match,offset,all} [{file,ioc,match,offset,all} ...]
-                        Output columns. On default all columns will be printed.
-  --sections SECTIONS [SECTIONS ...]
-                        Print results for specific section(s) of the pattern file. Default sections are: "ip url domain mail win_registry crypto"
-  -o OUTPUT_FILE_NAME   Output file name (works also in stdout mode).
-  -p INDIVIDUAL_PATTERN_FILE
-                        Use personal pattern file.
-  -e                    Enables whitelisting. Use ".forioccrawler --print-whitelist" to view the content.
-  -w INDIVIDUAL_WHITELIST_FILE
-                        Use personal whitelist file
-  -t THREADS, --threads THREADS
-                        Max process count for multi processing (default=4, max=16)
-  -n                    No match highligting
-  -s MATCH_SIZE         Set maximal match size (default=256). Have to be greater then 5.
-  -v, --verbose         Show debug messages and write debug log
-  --print-whitelist     Prints the path and the content of the default whitelist.
-  --print-pattern       Prints the path and the content of the default pattern file.
-  --time                Show run time.
-  --version             Show program version
-```
+Current version is 1.2.
 
 ## ToDo
 
-Version 1.1
-- [X] Implement support for personal whitelists
-- [X] Implement support for personal pattern file
-- [X] Rename program CSV mode to forensic
-- [X] Implement max match size
-
-Version 1.1.1
-- [X] Fixed a bug which was caused if the source was a absolute path
-- [X] Added better debug view. Verbose mode shows now a status of long running tasks
-- [X] Changed format of the printing of the runtime
-- [X] Only show relative path (the crawled data) in result
-
-Version 1.1.2
-- [X] Fixed a bug which causes that not all results were printet/exported
-- [X] Removed the -f argument. The source file or folder is now a standard argument
-- [X] Whitelisting is disabled by default now. It can be activated using the -e argument
-- [X] Added Regex to find Crypto adresses and Domains
-- [X] Added two arguments to print the pattern and the whitelist file (path and content)
-- [X] Help message improved
-
-For version 1.2
-- [ ] Search in compressed file formats like zip etc.
+For version 1.3
+- [ ] Search in compressed file archives like zip etc.
 - [ ] Search in file formats like pdf word etc.
 - [ ] Add more export features like json output
 - [ ] Optimize multiprocessing based on file size etc.
-- [ ] Rewrite how configurations (user settings like format, blocksize for reading etc) will passed to the crawler
 - [ ] Implement switch for printing offset as hex or decimal
 - [ ] Implement switch to output/export only unique matches
-- [ ] Implement a whitelist contains feature. Whitelisting for files or matches which contains a specific string.
-- [ ] Implement support for personal regex
 - [ ] Implement a feature to print bytes before and after a match
 - [ ] Test the Crawler on Windows images
 
