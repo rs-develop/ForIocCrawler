@@ -60,9 +60,12 @@ class Crawler():
                 self.rootFilePath = pathSrc
 
             # set relative path
-            if self.rootFilePath != pathSrc:
+            if self.rootFilePath != pathSrc and pathSrc != '.':
                 self.rootRelPath = os.path.relpath(pathSrc)
-                self.beginnRootRelPath = len(self.rootFilePath)-len(self.rootRelPath)
+                self.beginnRootRelPath = len(self.rootFilePath) - len(self.rootRelPath)
+            elif pathSrc == '.':
+                self.rootRelPath = self.rootFilePath[self.rootFilePath.rfind('/') + 1:]
+                self.beginnRootRelPath = len(self.rootFilePath)
             else:
                 self.rootRelPath = pathSrc
 
@@ -273,12 +276,13 @@ class Crawler():
                                                 #            "match": before + matchString + after, "offset": str(filePos + item.start())}
 
                                                 # hint: save only relative path
-                                                printDict = {"file" : file[self.beginnRootRelPath:], "ioc" : ioc_type, "match": matchString, "offset": str(filePos + item.start())}
+                                                printDict = {"path" : file[self.beginnRootRelPath:], "ioc" : ioc_type, "match": matchString, "offset": str(filePos + item.start())}
 
                                                 isWhiteListed = False
 
                                                 if self.whitlist:
                                                     if matchString in self.whitlist:
+
                                                         isWhiteListed = True
                                                         with self.processedFileCount.get_lock():
                                                             self.whiteListedMatches.value +=1
