@@ -1,8 +1,8 @@
 # ForIocCrawler - A forensic ioc crawler.
 
-This project aims to find IoCs in files, directories and mounted images directories and to get an overview of large amounts of data. 
-The core of the crawler is the use of pre defined regex to match common ioc types.
-It also has a whitelisting feature to prevent common false positives like version numbers, local ip addresses etc. 
+This project aims to find IoCs in files, directories and mounted image directories to get an overview of a large amount of unknown data. 
+The core of the crawler is the use of pre defined regex to match common IoC types.
+It also has a whitelisting feature to prevent common false positives like version numbers, local IP addresses etc. 
 Using the whitelisting feature it is possible to hide known good indicators and to reduce a huge amount of data and matches to a manageable count for analysis. 
 To adjust the *forioccrawler* and its output to your needs in a specific case, you can use a individual whitelist config.
 It is also possible to define individual pattern files to find additional IoCs.
