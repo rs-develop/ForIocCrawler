@@ -188,7 +188,7 @@ To see the help for the config menu type: `forioccrawler config`.
 
 ## Version
 
-Current version is 1.2.
+Current version is 1.2.1
 
 ## ToDo
 

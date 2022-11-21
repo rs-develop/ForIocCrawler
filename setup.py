@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="ForIocCrawler",
-    version="1.2",
+    version="1.2.1",
     author="rs-develop",
     author_email="rsdevelop.contact@gmail.com",
     description="A forensic ioc extractor",
