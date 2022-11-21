@@ -1,4 +1,4 @@
-# ForIocCrawler - A forensic ioc crawler.
+# ForIocCrawler (fic) - A forensic ioc crawler.
 
 This project aims to find IoCs in files, directories and mounted image directories to get an overview of a large amount of unknown data. 
 The core of the crawler is the use of pre defined regex to match common IoC types.
@@ -48,35 +48,35 @@ The forioccrawler has three main commands:
 ## Quick Start Guide for parsing
 
 Simple run over a file. The output of the results will printed to *stdout*.<br>
-`forioccrawler parse evil.exe`
+`fic parse evil.exe`
 
 Print matches only. Specify the column. Available columns are: [file, ioc, match, offset]. On default all columns are printed.<br>
-`forioccrawler parse file.txt -c match`
+`fic parse file.txt -c match`
 
 It is also possible to ajust the columns to your needs.<br>
-`forioccrawler parse evil.exe -c match offset`
+`fic parse evil.exe -c match offset`
 
 To search only for urls, you can use the *type* argument. Multiple options are allowed.<br>
-`forioccrawler parse iocs.txt --type url`
-`forioccrawler parse iocs.txt --t url`
+`fic parse iocs.txt --type url`
+`fic parse iocs.txt --t url`
 
 Print the matches on stdout and write them to file.<br>
-`forioccrawler parse iocs.txt --columns ioc match -o output_file.csv`
-`forioccrawler parse iocs.txt -c ioc match -o output_file.csv`
+`fic parse iocs.txt --columns ioc match -o output_file.csv`
+`fic parse iocs.txt -c ioc match -o output_file.csv`
 
 All mentioned arguments can also be used with directories or mount points. For better processing overview the forensic mode can be used.<br>
-`forioccrawler parse /mnt/server_image -c ioc match offset --mode forensics -o output_file.csv`
+`fic parse /mnt/server_image -c ioc match offset --mode forensics -o output_file.csv`
 
 Enable whitelisting (Default whitelist).<br>
-`forioccrawler parse /mnt/server_image --whitelist`
+`fic parse /mnt/server_image --whitelist`
 
 Set a individual pattern and/or whitelist file.<br>
-`forioccrawler parse /home/user/Downloads --load-whitelist myWhitelist.ini --load-pattern mypattern.ini`
-`forioccrawler parse /home/user/Downloads --load-pattern mypattern.ini`
-`forioccrawler parse /home/user/Downloads --load-whitelist myWhitelist.ini`
+`fic parse /home/user/Downloads --load-whitelist myWhitelist.ini --load-pattern mypattern.ini`
+`fic parse /home/user/Downloads --load-pattern mypattern.ini`
+`fic parse /home/user/Downloads --load-whitelist myWhitelist.ini`
 
 For processing large files, you can use the forensics mode and the verbose flag to check the status of the crawler.<br>
-`forioccrawler parse large.txt -m forensics -v -o out.txt`
+`fic parse large.txt -m forensics -v -o out.txt`
 
 ## Program modes
 
@@ -135,11 +135,11 @@ You have the match `192.168.1.122` for the IP pattern. The crawler checks the wh
 
 To create your own whitelist file, define a section and add entries to the section.
 
-To use your whitelist file, add the `--load-whitelist` argument: `forioccrawler parse file.bin --load-whitelist myWhitelist.ini`. 
+To use your whitelist file, add the `--load-whitelist` argument: `fic parse file.bin --load-whitelist myWhitelist.ini`. 
 If you load your own whitelist, you dont have to enable whitelisting seperately.
-Alternativ you can permanently add your whitelist to the crawler for using it by default `forioccrawler config --set-whitelist myWhitelist.ini`.
+Alternativ you can permanently add your whitelist to the crawler for using it by default `fic config --set-whitelist myWhitelist.ini`.
 
-Below you can find an example for a whitelist file. Using the `forioccrawler config --print-whitelist` command, you can print the default whitelist.
+Below you can find an example for a whitelist file. Using the `fic config --print-whitelist` command, you can print the default whitelist.
 
 ```
 # my whitelist file
@@ -159,10 +159,10 @@ Patterns are the core functionality of the ioc crawler. Is one of your match exp
 To create a log file use the verbose mode (`-v`, `--verbose`).
 To create a individual pattern file, you have to define pattern sections. Every section consists of one or more key:value pairs.
 
-To use your personal pattern file, add the `--load-pattern` argument: `forioccrawler parse file.bin --load-pattern myPattern.ini`.
-To use your pattern everytime you use the crawler, add it as default: `forioccrawler config --set-pattern myPattern.ini`.
+To use your personal pattern file, add the `--load-pattern` argument: `fic parse file.bin --load-pattern myPattern.ini`.
+To use your pattern everytime you use the crawler, add it as default: `fic config --set-pattern myPattern.ini`.
 
-Using the `forioccrawler config --print-pattern` argument, you can print the path and the content of the default pattern.
+Using the `fic config --print-pattern` argument, you can print the path and the content of the default pattern.
 
 In the following an example for an individual pattern file is shown.
 ```
@@ -177,14 +177,14 @@ value : (GET\srequest\sfor\member.php\s.{3,})"
 ## Config Menu
 
 The config menu allows you to change crawler settings, the default whitelist and pattern file and the default thread count.
-You can print the current configuration using `forioccrawler config --show`.
+You can print the current configuration using `fic config --show`.
 In addition to change the default pattern und whitelist file, you can restore the default configuration of the crawler.
 
 ## Program help
 
 The crawler have two main sub menus: `parse` and `config`.
-To see the help for the parse menu type: `forioccrawler parse -h`.
-To see the help for the config menu type: `forioccrawler config`.
+To see the help for the parse menu type: `fic parse -h`.
+To see the help for the config menu type: `fic config`.
 
 ## Version
 
