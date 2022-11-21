@@ -125,6 +125,19 @@ Release v 1.2 Features
 Release v 1.2                                                    DONE
 -------------------------------------------------------------------------------
 
+Release v 1.2.1 Features
+
+    DONE    Changed the name from "ForIocCrawler" to "fic"
+    
+    DONE    Fixed a bug which causes whitelisting fails because of the false
+            relative path
+    
+    DONE    Added new linux paths for whitelisting
+
+-------------------------------------------------------------------------------
+Release v 1.2.1                                                  OPEN
+-------------------------------------------------------------------------------
+
 Release v 1.3 Features
 
     OPEN    Search in compressed file formats like zip, tar.gz etc.
@@ -143,6 +156,8 @@ Release v 1.3 Features
     OPEN    Implement a whitelist contains feature.
             Whitelisting for files or matches which contains a specific
             string
+
+    OPEN    Extend whitelisting features with regex
 
     OPEN    Test the crawler on Windows images
 
