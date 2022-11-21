@@ -168,7 +168,7 @@ class Crawler():
                         filePathStr = os.path.join(root, filename)
                         if self.whitlist:
                             # get the index of the relative beginning of the file to check whitelisting
-                            idx = filePathStr.index(relPathSrc) + len(relPathSrc)
+                            idx = filePathStr.index(relPathSrc) + len(relPathSrc) - 1
                             if filePathStr[idx:] in self.whitlist:
                                 LOG.debug("%s whitelisted." %(filePathStr[idx:]))
                                 self.whitlistedFiles +=1
