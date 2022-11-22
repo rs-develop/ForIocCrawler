@@ -1,1 +1,3 @@
 crawler/__pycache__
+dist/
+ForIocCrawler.egg-info
