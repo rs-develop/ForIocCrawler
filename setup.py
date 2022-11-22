@@ -11,11 +11,11 @@ setuptools.setup(
     description="A forensic ioc extractor",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/rs-develop/ForIocCrawler",
+    url="https://github.com/rs-develop/forioccrawler",
     project_urls={
         "Bug Tracker": "https://github.com/rs-develop/ForIocCrawler/issues",
     },
-    scripts=['forioccrawler'],
+    scripts=['fic'],
     packages=['crawler'],
 	include_package_data=True,
     classifiers=[
