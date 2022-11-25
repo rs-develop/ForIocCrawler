@@ -135,11 +135,36 @@ Release v 1.2.1 Features
     DONE    Added new linux paths for whitelisting
 
 -------------------------------------------------------------------------------
-Release v 1.2.1                                                  OPEN
+Release v 1.2.1                                                  DONE
+-------------------------------------------------------------------------------
+
+Release v 1.2.2
+
+    OPEN    Resolve an issue where a whole part of a path is whiltelisted.
+            But the whitelisting path belongs only to a small part of the path.
+
+-------------------------------------------------------------------------------
+Release v 1.2.2                                                  OPEN
 -------------------------------------------------------------------------------
 
 Release v 1.3 Features
 
+    OPEN    Optimize multiprocessing based on file size and not on
+            file count. The processing and splitting of the files
+            should be done in the readFiles function of the crawler.
+
+    OPEN    Implement switch for printing offset as hex or decimal
+
+    OPEN    Implement switch to output/export only unique matches
+
+    OPEN    Test the crawler on Windows images
+
+-------------------------------------------------------------------------------
+Release v 1.3                                                  OPEN
+-------------------------------------------------------------------------------
+
+Release v 1.3.1 Features    
+    
     OPEN    Search in compressed file formats like zip, tar.gz etc.
 
     OPEN    Search in file formats like pdf word etc.
@@ -147,20 +172,10 @@ Release v 1.3 Features
 
     OPEN    Add more export features like json output
 
-    OPEN    Optimize multiprocessing based on file size etc.
-
-    OPEN    Implement switch for printing offset as hex or decimal
-
-    OPEN    Implement switch to output/export only unique matches
-
     OPEN    Implement a whitelist contains feature.
             Whitelisting for files or matches which contains a specific
             string
 
-    OPEN    Extend whitelisting features with regex
-
-    OPEN    Test the crawler on Windows images
-
 -------------------------------------------------------------------------------
-Release v 1.3                                                  OPEN
+Release v 1.3.1                                                OPEN
 -------------------------------------------------------------------------------
